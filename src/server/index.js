@@ -21,7 +21,6 @@ app.post("/computeConeTriangulation", (req, res) => {
   const R = radius;
   const N = segments;
 
-  // let P1 = { x: R, y: 0, z: 0 }; // Инициализируем P1
   const A = { x: 0, y: 0, z: H }; // Сохраняем точку A
   const angle = (2 * Math.PI * (0)) / N;
   let P1 = { x: R * Math.cos(angle), y: R * Math.sin(angle), z: 0 };
@@ -40,7 +39,7 @@ app.post("/computeConeTriangulation", (req, res) => {
     P1 = P2; // Обновляем P1 для следующей итерации
   }
 
-  res.json(triangles);
+  res.json({height: height, points: triangles});
   }
 );
 

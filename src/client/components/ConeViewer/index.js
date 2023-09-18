@@ -116,7 +116,7 @@ const ConeViewer = ({ triangles }) => {
       // Создаем меш и добавляем его в сцену с материалами
       const cone = new THREE.Mesh(geometry, greyMaterial);
       cone.rotation.x = Math.PI / 4;
-      const wireframe = new THREE.Mesh(geometry, wireframeMaterial);
+      const wirefnew THREE.Mesh(geometry, wireframeMaterial);
       wireframe.rotation.x = Math.PI / 4;
 
       scene.add(cone);
@@ -124,7 +124,7 @@ const ConeViewer = ({ triangles }) => {
 
       rendererRef.current = newRenderer;
 
-      const animate = () => {
+      const animate = () =rame = > {
         requestAnimationFrame(animate);
         const speed = 0.003;
         cone.rotation.x += speed;
