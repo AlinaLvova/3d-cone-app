@@ -1,13 +1,11 @@
-.cone-viewer{
-    // width: 100%;
-     height: 100%;
+.cone-viewer {
+    max-width: 99%;
+    max-height: 100%;
+    height: 100%;
+    width: 99%;
     // max-width: 100%;
-    flex: 1 0 auto;
+    // flex: 1 0 auto;
+    display: block;
     box-sizing: border-box;
-}
-
-canvas{
-    // max-width: 90%;
-    // max-height: 100%;
-    background-color: rgb(255, 255, 255);
+    background-color: white;
 }

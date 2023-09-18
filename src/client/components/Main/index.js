@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import classes from "./index.module.scss";
-import ConeViewer from "../ConeViewer2";
+import ConeViewer from "../ConeViewer";
 
 const data = {
   "height": 10,

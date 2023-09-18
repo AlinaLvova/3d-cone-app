@@ -1,13 +1,13 @@
 import PropTypes from "prop-types"; // Импортируем PropTypes
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
 import classes from "./index.module.scss";
 import * as THREE from "three";
 
 // Функция для создания конуса
-const createConeMesh = (triangles) => {
-  const h = 35;
-
-  const data = triangles;
+// eslint-disable-next-line no-unused-vars
+const createConeMesh = (height, points) => {
+  const h = height;
+  const data = points;
 
   const geometry = new THREE.BufferGeometry();
   const vertices = [];
@@ -60,15 +60,15 @@ const createConeMesh = (triangles) => {
 
 // Функция для создания материалов
 const createMaterials = () => {
-  // Создаем материал для серых граней с прозрачностью
+  // Создание материала для серых граней с прозрачностью
   const greyMaterial = new THREE.MeshLambertMaterial({
     color: new THREE.Color(42 / 255, 42 / 255, 94 / 255), // Серый цвет
-    opacity: 0.7, // Прозрачность
-    transparent: true, // Сделаем материал прозрачным
+    opacity: 0.7, 
+    transparent: true, 
     side: THREE.BackSide, // Изменяем направление нормалей
   });
 
-  // Создаем материал для фиолетовой сетки граней
+  // Создание материала для фиолетовой сетки граней
   const wireframeMaterial = new THREE.MeshBasicMaterial({
     color: new THREE.Color(217 / 255, 56 / 255, 204 / 255), // Фиолетовый цвет в формате RGB
     wireframe: true, // Показываем только грани
@@ -77,102 +77,205 @@ const createMaterials = () => {
   return [greyMaterial, wireframeMaterial];
 };
 
-const ConeViewer = ({ triangles }) => {
-  const containerRef = useRef(null);
-  const rendererRef = useRef(null);
-  const [sceneState, setSceneState] = useState(false);
-  let scene = new THREE.Scene();
-
-  useEffect(() => {
-    const scene = new THREE.Scene();
-
-    // Получаем ссылку на контейнер и рендерер
-    const container = containerRef.current;
-    const renderer = rendererRef.current;
-   
-    // Создаем сцену, камеру и рендерер, если они еще не созданы
-    if (!renderer) {
-      
-      // Создаем камеру с перспективной проекцией
-      const camera = new THREE.PerspectiveCamera(
-        75, // Угол обзора
-        container.clientWidth / container.clientHeight, // Соотношение сторон
-        0.1, // Ближняя видимость
-        1000 // Дальняя видимость
-      );
-      const newRenderer = new THREE.WebGLRenderer();
-      newRenderer.setClearColor(0xffffff);
-      newRenderer.setSize(container.clientWidth, container.clientHeight);
-
-      container.appendChild(newRenderer.domElement);
-
-      camera.position.set(0, -35, 52.5);
-      camera.lookAt(0, 0, 0);
-
-      // Создаем конус и материалы
-      const geometry = createConeMesh(triangles);
-      const [greyMaterial, wireframeMaterial] = createMaterials();
-
-      // Создаем меш и добавляем его в сцену с материалами
-      const cone = new THREE.Mesh(geometry, greyMaterial);
-      cone.rotation.x = Math.PI / 4;
-      const wirefnew THREE.Mesh(geometry, wireframeMaterial);
-      wireframe.rotation.x = Math.PI / 4;
-
-      scene.add(cone);
-      scene.add(wireframe);
-
-      rendererRef.current = newRenderer;
-
-      const animate = () =rame = > {
-        requestAnimationFrame(animate);
-        const speed = 0.003;
-        cone.rotation.x += speed;
-        wireframe.rotation.x += speed;
-        cone.rotation.y += speed;
-        wireframe.rotation.y += speed;
-        wireframe.rotation.z += speed;
-        cone.rotation.z += speed;
-
-        newRenderer.render(scene, camera);
-      };
-
-      animate();
-
-      setSceneState(false);
-    }
-  }, [sceneState]);
-
-  useEffect (() => {
-    setSceneState(true);
-    const [greyMaterial, wireframeMaterial] = createMaterials();
-
-    scene.remove(greyMaterial, wireframeMaterial);
-    scene.clear();
-      // // Создаем конус и материалы
-      // const geometry = createConeMesh(triangles);
-      // // Создаем меш и добавляем его в сцену с материалами
-      // const cone = new THREE.Mesh(geometry, greyMaterial);
-      // cone.rotation.x = Math.PI / 4;
-      // const wireframe = new THREE.Mesh(geometry, wireframeMaterial);
-      // wireframe.rotation.x = Math.PI / 4;
-
-      // scene.add(cone);
-      // scene.add(wireframe);
-  }, [triangles]);
-
-  return (
-    <div
-      id="cone-viewer"
-      className={classes["cone-viewer"]}
-      ref={containerRef}
-    ></div>
+//----------------------------------------------------------------
+// Function to calculate unit surface normal
+const calculateUnitNormal = (point, basePoint) => {
+  const Ni = new THREE.Vector3(
+    point.x - basePoint.x,
+    point.y - basePoint.y,
+    point.z - basePoint.z
   );
+
+  const magnitude = Math.sqrt(
+    Ni.x * Ni.x + Ni.y * Ni.y + Ni.z * Ni.z
+  );
+
+  return new THREE.Vector3(Ni.x / magnitude, Ni.y / magnitude, Ni.z / magnitude);
 };
 
-// Добавляем проверку типов для пропса triangles
+// Function to create cone geometry with smooth representation
+// eslint-disable-next-line no-unused-vars
+const createSmoothConeMesh = (height, points) => {
+  const H = height;
+  const data = points;
+  const R = points[0].x;
+
+  const geometry = new THREE.BufferGeometry();
+  const vertices = [];
+  const indices = [];
+  const normals = [];
+
+    // Создание вершин и индексов для боковой поверхности конуса
+    for (let i = 0; i < data.length - 1; i++) {
+      vertices.push(data[i].x, data[i].y, 0);
+      vertices.push(data[i + 1].x, data[i + 1].y, 0);
+      vertices.push(0, 0, H);
+  
+      const vertexIndex = i * 3;
+      indices.push(vertexIndex, vertexIndex + 1, vertexIndex + 2);
+    }
+  
+    // Создание вершин и индексов для соединения вершины конуса с основанием
+    vertices.push(data[data.length - 1].x, data[data.length - 1].y, 0);
+    vertices.push(data[0].x, data[0].y, 0);
+    vertices.push(0, 0, H);
+  
+    const vertexIndex = (data.length - 1) * 3;
+    indices.push(vertexIndex, vertexIndex + 1, vertexIndex + 2);
+  
+    // Создание вершин и индексов для основания конуса
+    for (let i = 0; i < data.length - 1; i++) {
+      vertices.push(data[i].x, data[i].y, 0);
+      vertices.push(data[i + 1].x, data[i + 1].y, 0);
+      vertices.push(0, 0, 0);
+  
+      const vertexIndex2 = (i + data.length) * 3;
+      indices.push(vertexIndex2 + 2, vertexIndex2 + 1, vertexIndex2);
+    }
+  
+    // Создание вершин и индексов для соединения вершины конуса с основанием
+    vertices.push(data[data.length - 1].x, data[data.length - 1].y, 0);
+    vertices.push(data[0].x, data[0].y, 0);
+    vertices.push(0, 0, 0);
+  
+    const vertexIndex2 = (2 * data.length - 1) * 3;
+    indices.push(vertexIndex2 + 2, vertexIndex2 + 1, vertexIndex2);
+  
+    geometry.setIndex(indices);
+
+  // Calculate normals for each vertex based on the smooth representation formula
+  for (let i = 0; i < data.length; i++) {
+    const basePoint = new THREE.Vector3(0, 0, -R * R / H);
+    const point = new THREE.Vector3(data[i].x, data[i].y, 0);
+    const normal = calculateUnitNormal(point, basePoint);
+
+    normals.push(normal.x, normal.y, normal.z);
+  }
+
+  // Set attributes for vertices, indices, and normals
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+  geometry.setIndex(indices);
+  geometry.setAttribute("normal", new THREE.Float32BufferAttribute(normals, 3));
+
+  return geometry;
+};
+//----------------------------------------------------------------
+
+
+const ConeViewer = ({ triangles, visible }) => {
+  const height = triangles.height;
+  const points = triangles.points;
+
+  useEffect(() => {
+    const canvas = document.querySelector("#cone-viewer");
+    const renderer = new THREE.WebGLRenderer({ canvas });
+
+    const fov = 75;
+    const aspect = canvas.clientWidth / canvas.clientHeight; // соотношение сторон канвы
+    const near = 0.1;
+    const far = 1000;
+    const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+
+    if (points[0].x > height) camera.position.z = points[0].x * 2;
+    else camera.position.z = height * 2; // Установка начального положение камеры
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color("white");
+
+    const group = new THREE.Group();
+
+    function addStuffToScene() {
+      // Создание конуса и добавление его в группу
+      const coneGeometry = createConeMesh(height, points);
+      const materials = createMaterials();
+      const coneMesh = new THREE.Mesh(coneGeometry, materials[0]);
+      group.add(coneMesh);
+
+      const wireframeGeometry = createConeMesh(height, points);
+      const wireframeMaterial = materials[1];
+      const wireframeMesh = new THREE.Mesh(
+        wireframeGeometry,
+        wireframeMaterial
+      );
+      group.add(wireframeMesh);
+
+      scene.add(group);
+    }
+
+    function dispose() {
+      if (group instanceof THREE.Object3D) {
+        if (group.parent) {
+          group.parent.remove(group);
+        }
+      }
+      if (group.dispose) {
+        group.dispose();
+      }
+
+      group.clear();
+    }
+
+    function process() {
+      addStuffToScene();
+    }
+
+    function resizeRendererToDisplaySize(renderer) {
+      const canvas = renderer.domElement;
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      const needResize = canvas.width !== width || canvas.height !== height;
+      if (needResize) {
+        renderer.setSize(width, height, false);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+      }
+      return needResize;
+    }
+
+    function render(time) {
+      time *= 0.001;
+
+      if (resizeRendererToDisplaySize(renderer)) {
+        const canvas = renderer.domElement;
+        camera.aspect = canvas.clientWidth / canvas.clientHeight;
+        camera.updateProjectionMatrix();
+      }
+      const speed = 0.2 + 1 * 0.1;
+      const rot = time * speed;
+      group.rotation.x = rot;
+      group.rotation.y = rot;
+      group.rotation.z = rot;
+
+      renderer.render(scene, camera);
+
+      requestAnimationFrame(render);
+    }
+
+    if (!visible) {
+      dispose();
+    } else {
+      dispose();
+      process();
+    }
+
+    requestAnimationFrame(render);
+  }, [triangles, visible]);
+
+  return <canvas id="cone-viewer" className={classes["cone-viewer"]}></canvas>;
+};
+
+// Добавляем проверку типов для пропсов visible и triangles
 ConeViewer.propTypes = {
-  triangles: PropTypes.arrayOf(PropTypes.object).isRequired, // Треугольники должны быть массивом и обязательными
+  triangles: PropTypes.shape({
+    height: PropTypes.number.isRequired,
+    points: PropTypes.arrayOf(
+      PropTypes.shape({
+        x: PropTypes.number.isRequired,
+        y: PropTypes.number.isRequired,
+      })
+    ).isRequired,
+  }).isRequired,
+  visible: PropTypes.bool.isRequired,
 };
 
 export default ConeViewer;
