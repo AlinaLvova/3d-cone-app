@@ -4,6 +4,9 @@
 
 This project is a client-server web application that allows users to create and visualize a simple cone in 3D. The application provides a 3D view of a cone based on user-defined parameters such as cone height, radius, and the number of segments on a circle. It utilizes WebGL and the three.js library for rendering the cone in a 3D space.
 
+![demo](./demo.png)
+
+
 ## Getting Started
 
 To run the application locally, follow these steps:
@@ -64,6 +67,7 @@ You can modify the parameters of the cone and create different cone shapes in th
 
 ## Video Demonstration
 For a video demonstration of the project's functionality, please watch the accompanying video.
-https://drive.google.com/file/d/1E6xXhD1EAxzGGnY8fzlssbSXpf4rkMFo/view?usp=sharing
+The video file is located in the root of this repository.
+
 
 Enjoy using the 3D Cone Viewer!
